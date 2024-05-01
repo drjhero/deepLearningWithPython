@@ -1,0 +1,168 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOxe8Ra9v1uOOBoq7GJEUlK",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/drjhero/deepLearningWithPython/blob/main/chapter3\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "OGvs-iZrEVVI"
+      },
+      "outputs": [],
+      "source": [
+        "from tensorflow import keras\n",
+        "\n",
+        "class SimpleDense(keras.layers.Layer):\n",
+        "  def __init__(self, units, activation=None):\n",
+        "    super().__init__()\n",
+        "    self.units = units\n",
+        "    self.activation = activation\n",
+        "\n",
+        "  def build(self, input_shape):\n",
+        "    input_dim = input_shape[-1]\n",
+        "    self.W = self.add_weight(shape=(input_dim, self.units),\n",
+        "                             initializer=\"random_normal\")\n",
+        "    self.b = self.add_weight(shape=(self.units,),\n",
+        "                             initializer=\"zeros\")\n",
+        "\n",
+        "  def call(self, inputs):\n",
+        "    y = tf.matmul(inputs, self.W) + self.b\n",
+        "    if self.activation is not None:\n",
+        "      y = self.activation(y)\n",
+        "    return y"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import tensorflow as tft\n",
+        "\n",
+        "my_dense = SimpleDense(units=32, activation=tf.nn.relu)\n",
+        "input_tensor = tf.ones(shape=(2, 784))\n",
+        "output_tensor = my_dense(input_tensor)\n",
+        "print(input_tensor )\n",
+        "print(output_tensor)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "isaL5PljGUrj",
+        "outputId": "dea0994f-fd7f-487a-e773-3810086c5e15"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "tf.Tensor(\n",
+            "[[1. 1. 1. ... 1. 1. 1.]\n",
+            " [1. 1. 1. ... 1. 1. 1.]], shape=(2, 784), dtype=float32)\n",
+            "tf.Tensor(\n",
+            "[[0.8954736  1.6434181  3.922412   0.61196744 2.1535873  0.\n",
+            "  0.         0.         0.         1.0508405  1.7551022  0.95932144\n",
+            "  0.         0.         0.         0.3559304  0.         0.\n",
+            "  0.         0.44198418 0.         0.         0.3409144  0.6634818\n",
+            "  0.         0.         1.279439   0.         0.43731117 0.9350123\n",
+            "  0.70147145 0.        ]\n",
+            " [0.8954736  1.6434181  3.922412   0.61196744 2.1535873  0.\n",
+            "  0.         0.         0.         1.0508405  1.7551022  0.95932144\n",
+            "  0.         0.         0.         0.3559304  0.         0.\n",
+            "  0.         0.44198418 0.         0.         0.3409144  0.6634818\n",
+            "  0.         0.         1.279439   0.         0.43731117 0.9350123\n",
+            "  0.70147145 0.        ]], shape=(2, 32), dtype=float32)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "model = keras.Sequential([keras.layers.Dense(1)])\n",
+        "model.compile(optimizer=\"rmsprop\",\n",
+        "              loss=\"mean_squared_error\",\n",
+        "              metrics=[\"accuracy\"])\n"
+      ],
+      "metadata": {
+        "id": "y9FMtEgHJQI7"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import numpy as np\n",
+        "\n",
+        "model = keras.Sequential([keras.layers.Dense(1)])\n",
+        "model.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.1),\n",
+        "              loss=keras.losses.MeanSquaredError(),\n",
+        "              metrics=[keras.metrics.BinaryAccuracy()])\n",
+        "\n",
+        "indices_permutation = np.random.permutation(len(inputs))\n",
+        "shuffled_inputs = inputs[indices_permutation]\n",
+        "shuffled_targets = targets[indices_permutation]\n",
+        "\n",
+        "num_validation_samples = int(0.3 * len(inputs))\n",
+        "val_inputs = shuffled_inputs[:num_validation_samples]\n",
+        "val_targets = shuffled_targets[:num_validation_samples]\n",
+        "training_inputs = shuffled_inputs[num_validation_samples:]\n",
+        "training_targets = shuffled_targets[num_validation_samples:]\n",
+        "model.fit(\n",
+        "    training_inputs,\n",
+        "    training_targets,\n",
+        "    epochs=5,\n",
+        "    batch_size=16,\n",
+        "    validation_data=(val_inputs, val_targets)\n",
+        ")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 211
+        },
+        "id": "1VAb3tnDKdAi",
+        "outputId": "1a73042a-75e1-400f-a52d-4232d54a819f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'inputs' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-8-ab0f4a4cdb16>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m history = model.fit(\n\u001b[0;32m----> 2\u001b[0;31m     \u001b[0minputs\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m     \u001b[0mtargets\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m     \u001b[0mepochs\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m5\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m     \u001b[0mbatch_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m128\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'inputs' is not defined"
+          ]
+        }
+      ]
+    }
+  ]
+}
