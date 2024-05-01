@@ -1,0 +1,146 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNxdFLr0L/h1AcKvU4atKiS",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/drjhero/deepLearningWithPython/blob/main/chapter8\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "W6aNp86IYJo1",
+        "outputId": "61d7d02e-514b-47e9-d252-ef97c216429f"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"model\"\n",
+            "_________________________________________________________________\n",
+            " Layer (type)                Output Shape              Param #   \n",
+            "=================================================================\n",
+            " input_1 (InputLayer)        [(None, 28, 28, 1)]       0         \n",
+            "                                                                 \n",
+            " conv2d (Conv2D)             (None, 26, 26, 32)        320       \n",
+            "                                                                 \n",
+            " max_pooling2d (MaxPooling2  (None, 13, 13, 32)        0         \n",
+            " D)                                                              \n",
+            "                                                                 \n",
+            " conv2d_1 (Conv2D)           (None, 11, 11, 64)        18496     \n",
+            "                                                                 \n",
+            " max_pooling2d_1 (MaxPoolin  (None, 5, 5, 64)          0         \n",
+            " g2D)                                                            \n",
+            "                                                                 \n",
+            " conv2d_2 (Conv2D)           (None, 3, 3, 128)         73856     \n",
+            "                                                                 \n",
+            " flatten (Flatten)           (None, 1152)              0         \n",
+            "                                                                 \n",
+            " dense (Dense)               (None, 10)                11530     \n",
+            "                                                                 \n",
+            "=================================================================\n",
+            "Total params: 104202 (407.04 KB)\n",
+            "Trainable params: 104202 (407.04 KB)\n",
+            "Non-trainable params: 0 (0.00 Byte)\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ],
+      "source": [
+        "# Listing 8.1 and 8.2\n",
+        "rom tensorflow import keras\n",
+        "from tensorflow.keras  import layers\n",
+        "inputs = keras.Input(shape=(28, 28, 1))\n",
+        "x = layers.Conv2D(filters=32, kernel_size=3, activation=\"relu\")(inputs)\n",
+        "x = layers.MaxPooling2D(pool_size=2)(x)\n",
+        "x = layers.Conv2D(filters=64, kernel_size=3, activation=\"relu\")(x)\n",
+        "x = layers.MaxPooling2D(pool_size=2)(x)\n",
+        "x = layers.Conv2D(filters=128, kernel_size=3, activation=\"relu\")(x)\n",
+        "x = layers.Flatten()(x)\n",
+        "outputs = layers.Dense(10, activation=\"softmax\")(x)\n",
+        "model = keras.Model(inputs=inputs, outputs=outputs)\n",
+        "model.summary()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Listing 8.3\n",
+        "from tensorflow.keras.datasets import mnist\n",
+        "\n",
+        "(train_images,  train_labels), (test_images, test_labels) = mnist.load_data()\n",
+        "train_images = train_images.reshape((60000, 28, 28, 1))\n",
+        "train_images = train_images.astype(\"float32\") / 255\n",
+        "test_images = test_images.reshape((10000, 28, 28, 1))\n",
+        "test_images = test_images.astype(\"float32\") / 255\n",
+        "model.compile(optimizer=\"rmsprop\",\n",
+        "              loss=\"sparse_categorical_crossentropy\",\n",
+        "              metrics=[\"accuracy\"])\n",
+        "model.fit(train_images, train_labels, epochs=5, batch_size=64)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5sSx5eRyaePR",
+        "outputId": "7bef5c55-adf7-46bf-d655-50d1ae8bc683"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz\n",
+            "11490434/11490434 [==============================] - 0s 0us/step\n",
+            "Epoch 1/5\n",
+            "938/938 [==============================] - 55s 58ms/step - loss: 0.1525 - accuracy: 0.9526\n",
+            "Epoch 2/5\n",
+            "938/938 [==============================] - 56s 60ms/step - loss: 0.0441 - accuracy: 0.9863\n",
+            "Epoch 3/5\n",
+            "938/938 [==============================] - 52s 55ms/step - loss: 0.0307 - accuracy: 0.9907\n",
+            "Epoch 4/5\n",
+            "938/938 [==============================] - 53s 57ms/step - loss: 0.0220 - accuracy: 0.9930\n",
+            "Epoch 5/5\n",
+            "938/938 [==============================] - 53s 56ms/step - loss: 0.0177 - accuracy: 0.9948\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.src.callbacks.History at 0x7e3398966e30>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 3
+        }
+      ]
+    }
+  ]
+}
